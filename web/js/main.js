@@ -1,5 +1,5 @@
 
-var f, p, s;
+var g_subunits, g_proj;
 
 var aspect = 960 / 500,
     chart = $("#chart");
@@ -10,10 +10,7 @@ $(window).on("resize", function() {
     chart.attr("height", targetWidth / aspect);
 });
 
-d3.json("transit-routes.topojson", function(error, routes) {
-
-	// TODO: since topoJSON doesn't save any space for our multi-line transit file, and since 
-	// we're apparently losing things like the route IDs, let's just switch back to using GeoJSON.
+d3.json("transit-routes.geojson", function(error, routes) {
 
 	// XXX TODO BUG - make responsive:
 	// http://stackoverflow.com/questions/9400615/whats-the-best-way-to-make-a-d3-js-visualisation-layout-responsive
@@ -22,7 +19,7 @@ d3.json("transit-routes.topojson", function(error, routes) {
 
  	console.log(routes);
 
-	var subunits = f = topojson.feature(routes, routes.objects.collection);
+	var subunits = g_subunits = routes; //topojson.feature(routes, routes.objects.collection);
 
  	// we want to center and translate according to the path object we've loaded. 
  	// Some of this code is from Mike Bostock on stackoverflow:
@@ -30,7 +27,7 @@ d3.json("transit-routes.topojson", function(error, routes) {
  	// and see https://groups.google.com/forum/#!topic/d3-js/lR7GGswygI8
 
  	// Create a unit projection.
-	var projection = p = d3.geo.albers()
+	var projection = g_proj = d3.geo.albers()
 	    .scale(1)
 	    .translate([0, 0])
 	    .rotate([112,0,0]);
@@ -54,19 +51,16 @@ d3.json("transit-routes.topojson", function(error, routes) {
 	// console.log(path);
 
 	var svg = d3.select("#chart");
-	svg.append("path")
-	    .datum(subunits)
-	    .attr("d", path)
-	    .attr("stroke", "#666")
-	    .attr("stroke-width", "2");
+	// svg.append("path")
+	//     .datum(subunits)
+	//     .attr("d", path)
+	//     .attr("stroke", "#666")
+	//     .attr("stroke-width", "2");
 
     svg.selectAll(".subunit")
-    .data(topojson.feature(routes, routes.objects.collection).features)
+    .data(routes.features) // topojson.feature(routes, routes.objects.collection).features)
 	  .enter().append("path")
-	    .attr("class", function(d) { return "subunit " + d.id; })
+	    .attr("class", function(d) { return "route id" + d.properties.AlphRte; })
 	    .attr("d", path);
-
-
-	    // TODO: make one of the routes blue.
 
 });
